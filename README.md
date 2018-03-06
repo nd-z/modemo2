@@ -7,7 +7,7 @@
 + For the ML module
 	+ [Sentiment Analyzer](https://github.com/cjhutto/vaderSentiment)
 	+ [Ideological Books Corpus](http://cs.umd.edu/~miyyer/ibc/)
-	+ [Skip-thoughts (Tensorflow)](https://github.com/tensorflow/models/tree/master/skip_thoughts)
+	+ [Skip-thoughts (Tensorflow)](https://github.com/tensorflow/models/tree/master/research/skip_thoughts)
 + For the Fb API handler (if necessary)
 	+ [Extract sorted comments from a post](https://developers.facebook.com/docs/graph-api/reference/v2.10/object/comments)
 + For the Article Crawler
