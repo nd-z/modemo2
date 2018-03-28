@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 from sklearn.svm import SVC
 import numpy as np
-import os.path
+import os
 #import sys
 import scipy.spatial.distance as sd
 from skip_thoughts import configuration
@@ -11,6 +11,8 @@ from skip_thoughts import encoder_manager
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import cPickle
 import time
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 class BiasAnalyzer(object):
 	def __init__(self, withSVM=False):
@@ -39,9 +41,12 @@ class BiasAnalyzer(object):
 		#f = open('skipthoughts.pkl', 'rb')
 		# right now, we're using a unidirectional skip model;
 		# we can try the bidirectional model later
-		VOCAB_FILE = "/Users/az/Desktop/projects/modemo/backend/modules/tf/skip_thoughts/pretrained/skip_thoughts_uni_2017_02_02/vocab.txt"
-		EMBEDDING_MATRIX_FILE = "/Users/az/Desktop/projects/modemo/backend/modules/tf/skip_thoughts/pretrained/skip_thoughts_uni_2017_02_02/embeddings.npy"
-		CHECKPOINT_PATH = "/Users/az/Desktop/projects/modemo/backend/modules/tf/skip_thoughts/pretrained/skip_thoughts_uni_2017_02_02/model.ckpt-501424"
+
+		dir_path = os.path.dirname(os.path.realpath(__file__))
+
+		VOCAB_FILE = dir_path + "/../data/vocab.txt"
+		EMBEDDING_MATRIX_FILE = dir_path + "/../data/embeddings.npy"
+		CHECKPOINT_PATH = dir_path + "/../data/model.ckpt-501424"
 
 		self.encoder.load_model(configuration.model_config(), vocabulary_file=VOCAB_FILE, embedding_matrix_file=EMBEDDING_MATRIX_FILE, checkpoint_path=CHECKPOINT_PATH)
 
@@ -66,8 +71,16 @@ class BiasAnalyzer(object):
 		for paragraph in paragraphs:
 			total_length += len(paragraph)
 
-		for paragraph in paragraphs:
+		for i, paragraph in enumerate(paragraphs):
 			p_bias, p_dict = self.get_paragraph_bias(paragraph)
+
+			print("pbias:", p_bias, "i:", i)
+			# concluding paragraph
+			if i == len(paragraphs) - 1:
+				p_bias = list(map(lambda x : x*1.5, p_bias))
+			elif i == 0:
+				# title
+				p_bias = list(map(lambda x : x*2.0, p_bias))
 
 			# weight it by proportion to total length
 			# this is tricky because im not sure what to do with the third entry
@@ -106,7 +119,19 @@ class BiasAnalyzer(object):
 		ret_dict = dict();
 
 		index = 0
-		for sentence in sentences:
+
+		std_weight = 1
+		topic_sentence_weight = 1.5
+
+		stop_words = set(stopwords.words('english'))
+		for i, sentence in enumerate(sentences):
+			weight = topic_sentence_weight if i == 0 else std_weight
+
+ 			# eliminate stopwords
+			word_tokens = word_tokenize(sentence)
+			filtered_sentence = [w for w in word_tokens if not w in stop_words]
+			sentence = " ".join(filtered_sentence)
+
 			# find 5 NN with their NN scores and compute vectors for them as well
 			# for each of the sentences in results, get the one with
 			# the best semantic similarity
@@ -122,7 +147,7 @@ class BiasAnalyzer(object):
 			bias_score = self.bias_dict[results[0]]
 
 			# final political bias vector:
-			bias_vec = [sentiment_score, results[1], bias_score]
+			bias_vec = list(map(lambda x : x*weight, [sentiment_score, results[1], bias_score]))
 
 			print(sentence, 'has a bias vector of:')
 			print(bias_vec)
@@ -133,10 +158,10 @@ class BiasAnalyzer(object):
 			# logic: sentiment multiplied by bias score will give us
 			# the correct actual bias; i.e. if a sentence is scored
 			# similar to a conservative sentence, but is actually negatively
-			# talking about the conservative side, then it should be 
+			# talking about the conservative side, then it should be
 			# treated as a liberal bias --> neg * neg = pos = liberal
 
-			# multiply by bias_vec[1] because the less similar it is to 
+			# multiply by bias_vec[1] because the less similar it is to
 			# one of our biased sentences, the less we want it to weigh in
 			# the aggregate score
 			bias_intensity = bias_vec[1]*bias_vec[2]
@@ -147,7 +172,7 @@ class BiasAnalyzer(object):
 
 			# this value puts a maximum cap on how much the sentiment score can
 			# influence the bias score's magnitude
-			# i.e. sentiment value can reduce the weight of the bias score by 
+			# i.e. sentiment value can reduce the weight of the bias score by
 			# at most 2/3
 			magnitude_cap = 0.33
 
@@ -180,6 +205,7 @@ class BiasAnalyzer(object):
 				else:
 					bias_intensity = bias_intensity*abs(bias_vec[0])
 
+			bias_intensity *= weight
 
 
 			# rationale: we dont want a sentence's bias index to be drastically reduced just because
@@ -286,10 +312,10 @@ class BiasAnalyzer(object):
 			# logic: sentiment multiplied by bias score will give us
 			# the correct actual bias; i.e. if a sentence is scored
 			# similar to a conservative sentence, but is actually negatively
-			# talking about the conservative side, then it should be 
+			# talking about the conservative side, then it should be
 			# treated as a liberal bias --> neg * neg = pos = liberal
 
-			# multiply by bias_vec[1] because the less similar it is to 
+			# multiply by bias_vec[1] because the less similar it is to
 			# one of our biased sentences, the less we want it to weigh in
 			# the aggregate score
 			bias_intensity = abs(bias_vec[1]*bias_vec[2])
@@ -300,7 +326,7 @@ class BiasAnalyzer(object):
 
 			# this value puts a maximum cap on how much the sentiment score can
 			# influence the bias score's magnitude
-			# i.e. sentiment value can reduce the weight of the bias score by 
+			# i.e. sentiment value can reduce the weight of the bias score by
 			# at most 2/3
 			magnitude_cap = 0.33
 

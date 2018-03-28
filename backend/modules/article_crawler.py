@@ -1,8 +1,10 @@
 from python_goose.goose import Goose
+import re
 
 class ArticleCrawler(object):
 	def __init__(self):
 		self.goose = Goose()
+		self.splitter = re.compile(r"""(?<![A-Z])[.!?]\s+(?=[A-Z])""", re.VERBOSE)
 
 	# grabs and processes the raw content from an article link
 	# into a list of a list of sentences
@@ -26,7 +28,7 @@ class ArticleCrawler(object):
 		temp = []
 
 		for paragraph in paragraphs:
-			sentences = paragraph.split('.')
+			sentences = self.splitter.split(paragraph)
 			temp2 = []
 
 			for sentence in sentences:
@@ -38,6 +40,7 @@ class ArticleCrawler(object):
 			temp.append(sentences)
 
 		ret_content = temp
+		ret_content.insert(0, [a.title])
 
 		return ret_content
 

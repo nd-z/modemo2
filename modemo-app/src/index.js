@@ -32,7 +32,7 @@ class Header extends React.Component {
     return (
       <div className='header'>
         <img src={logo} className='modemo-logo' alt='logo' />
-        <h2 className='modemo-title'>Modemo</h2>
+        <h2 className='modemo-title'>modemo</h2>
       </div>
     );
   }
@@ -45,21 +45,10 @@ class LandingPage extends React.Component {
         <h2 className='title'>Analyze a URL</h2>
         <UrlInput />
         <p>
-          Modemo can analyze the political bias of any news article for you.
+          modemo can analyze the political bias of any news article for you.
           Just input the article url of your choice and let Modemo show you the results.
         </p>
-        <hr className='divider-line-style'/>
-        <h2 className='title'>Scan your Facebook Feed</h2>
-        <button onClick={this.attemptLogin}>Continue with Facebook</button>
-        <p>
-          Modemo can analyze the political biases of articles on your Facebook newsfeed.
-          Find out how biased your news feed is.
-        </p>
       </div>);
-  }
-
-  attemptLogin() {
-    alert('I\'m going to try to log in.');
   }
 }
 
@@ -77,7 +66,7 @@ class UrlInput extends React.Component {
   }
 
   handleSubmit(event) {
-    alert('A url was submitted: ' + this.state.url);    
+    alert('A url was submitted: ' + this.state.url);
   }
 
   render() {

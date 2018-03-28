@@ -12,6 +12,7 @@ url = 'https://www.nytimes.com/2017/08/02/us/politics/trump-immigration.html'
 #url='http://www.foxnews.com/politics/2017/08/07/democrats-divided-over-whether-party-should-welcome-pro-life-candidates.html'
 crawler = ArticleCrawler()
 
+
 paragraphs = crawler.url_content(url)
 
 nyt_data = paragraphs
