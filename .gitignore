@@ -1,2 +1,7 @@
 *.pyc
 tf/skip_thoughts/pretrained/
+venv/
+*package.json
+*package-lock.json
+*.DS_Store
+.DS_Store
