@@ -14,6 +14,10 @@ import time
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
+# modified from https://github.com/varunmuthanna/Sarcasm-Detection
+import sarcasm_detection.sarcasm as sarcasm_analyzer
+
+
 class BiasAnalyzer(object):
 	def __init__(self, withSVM=False):
 		[lib, con, neu] = cPickle.load(open('sampleData.pkl', 'rb'))
@@ -143,11 +147,14 @@ class BiasAnalyzer(object):
 			# get compound sentiment score
 			sentiment_score = self.sentiment.polarity_scores(sentence)['compound']
 
+			
+			sarcasm_score = sarcasm_analyzer.getSarcasmScore(sentence) / 100
 			# then use the bias_dict to get its political leaning
 			bias_score = self.bias_dict[results[0]]
 
 			# final political bias vector:
 			bias_vec = list(map(lambda x : x*weight, [sentiment_score, results[1], bias_score]))
+
 
 			print(sentence, 'has a bias vector of:')
 			print(bias_vec)
@@ -164,7 +171,8 @@ class BiasAnalyzer(object):
 			# multiply by bias_vec[1] because the less similar it is to
 			# one of our biased sentences, the less we want it to weigh in
 			# the aggregate score
-			bias_intensity = bias_vec[1]*bias_vec[2]
+			# also multiply by sarcasm
+			bias_intensity = bias_vec[2]*bias_vec[3]
 
 			# we may want to threshold the sentiment score
 			# because if it's only slightly negative, it might just be
