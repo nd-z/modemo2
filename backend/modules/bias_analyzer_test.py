@@ -13,7 +13,8 @@ url = 'https://www.nytimes.com/2017/08/02/us/politics/trump-immigration.html'
 crawler = ArticleCrawler()
 
 
-paragraphs = crawler.url_content(url)
+# paragraphs = crawler.url_content(url)
+paragraphs = [['We should invest in healthcare and universal basic income.', 'Mehoy dude!']]
 
 nyt_data = paragraphs
 print(nyt_data)
@@ -23,13 +24,14 @@ print(nyt_data)
 print('initializing bias analyzer')
 start_time = time.time()
 #analyzer = BiasAnalyzer()
-analyzer = BiasAnalyzer()
+analyzer = BiasAnalyzer(withSVM=True)
 print('done')
 print(str(time.time() - start_time))
 
 start_time = time.time()
 
 ############## TESTING ARTICLE ANALYSIS ############
+# totalbias, total_dict = analyzer.get_article_bias(nyt_data)
 totalbias, total_dict = analyzer.get_article_bias(nyt_data)
 print('done')
 print(str(time.time() - start_time))
