@@ -139,7 +139,7 @@ class BiasAnalyzer(object):
 
         print('PREDICTED BIAS DIRECTION: ', bias_direction)
 
-        bias_intensity *= bias_direction
+        bias_intensity *= bias_direction[0]
 
         if abs(bias_vec[0]) > magnitude_cap:
             bias_intensity *= abs(bias_vec[0])
@@ -178,11 +178,14 @@ class BiasAnalyzer(object):
             weight = topic_sentence_weight if i == 0 else std_weight
 
             sarcasm_score = sarcasm_analyzer.getSarcasmScore(sentence) / 100
+            original_sentence = sentence
 
             # eliminate stopwords
+            '''
             word_tokens = word_tokenize(sentence)
             filtered_sentence = [w for w in word_tokens if not w in stop_words]
             sentence = " ".join(filtered_sentence)
+            '''
 
             # find 5 NN with their NN scores and compute vectors for them as well
             # for each of the sentences in results, get the one with
@@ -204,8 +207,7 @@ class BiasAnalyzer(object):
             # should not be multiplying bias_score by weight, as above
             bias_vec.extend([bias_score])
 
-            print(sentence, 'has a bias vector of:')
-            print(bias_vec)
+            print(sentence)
 
             # this computes both the bias direction and intensity
             # ....hopefully lol
@@ -223,7 +225,7 @@ class BiasAnalyzer(object):
             bias_intensity = bias_vec[2]*bias_vec[3]
             print('sarcasm score: ')
             print(sarcasm_score)
-            if(sarcasm_score > 0.15):
+            if(sarcasm_score > 0.5):
                 print('super sarcastic yo')
                 bias_intensity *= -1 * sarcasm_score
 
@@ -244,6 +246,8 @@ class BiasAnalyzer(object):
 
             bias_intensity *= weight
 
+            print('BIAS INTENSITY: ', bias_intensity)
+
             # rationale: we dont want a sentence's bias index to be drastically reduced just because
             # there isnt much sentiment detected. likewise, we dont want its bias sign flipped just
             # because it's 33% positive or negative, so the threshold for flipping is raised to ensure
@@ -261,7 +265,7 @@ class BiasAnalyzer(object):
                 aggregate_score[2] += 1
 
             # map sentence to its bias intensity
-            ret_dict[sentence] = bias_intensity
+            ret_dict[original_sentence] = bias_intensity
 
             index += 1
 
@@ -330,9 +334,11 @@ class BiasAnalyzer(object):
             sarcasm_score = sarcasm_analyzer.getSarcasmScore(sentence) / 100
 
             # eliminate stopwords
+            '''
             word_tokens = word_tokenize(sentence)
             filtered_sentence = [w for w in word_tokens if not w in stop_words]
             sentence = " ".join(filtered_sentence)
+            '''
 
             # find 5 NN with their NN scores and compute vectors for them as well
             # for each of the sentences in results, get the one with
@@ -340,7 +346,9 @@ class BiasAnalyzer(object):
 
             # bound ensures that of the NNs found, at least 1 will not be one of the current sentences we're looking for
             results = self.get_largest_nn(index)
-            #print(results)
+            
+            print('nearest neighbors of: ', sentence)
+            print(results)
 
             # get compound sentiment score
             sentiment_score = self.sentiment.polarity_scores(sentence)['compound']
