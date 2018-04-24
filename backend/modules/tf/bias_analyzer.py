@@ -19,9 +19,10 @@ from sarcasm_detection import sarcasm as sarcasm_analyzer
 import sarcasm_detection.sarcasm as sarcasm_analyzer
 
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 class BiasAnalyzer(object):
     def __init__(self, withSVM=False):
-        [lib, con, neu] = cPickle.load(open('sampleData.pkl', 'rb'))
+        [lib, con, neu] = cPickle.load(open(os.getcwd() + '/modules/sampleData.pkl', 'rb'))
 
         self.bias_dict = {}
 
@@ -172,6 +173,9 @@ class BiasAnalyzer(object):
         std_weight = 1
         topic_sentence_weight = 1.5
 
+	def __init__(self, withSVM=False):
+		[lib, con, neu] = cPickle.load(open(dir_path + '/sampleData.pkl', 'rb'))
+
         stop_words = set(stopwords.words('english'))
 
         for i, sentence in enumerate(sentences):
@@ -271,7 +275,7 @@ class BiasAnalyzer(object):
         self.blacklist = []
         print(aggregate_score)
         return aggregate_score, ret_dict
-        
+
     # gets the 5 NN and returns the one with the largest semantic similarity
     def get_largest_nn(self, ind, num=5):
         encoding = self.data_encodings[ind]
@@ -317,7 +321,7 @@ class BiasAnalyzer(object):
         topic_sentence_weight = 1.5
 
         stop_words = set(stopwords.words('english'))
-        
+
         for i, sentence in enumerate(self.data):
 
             label = self.bias_dict[sentence]
