@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import logo from './logo.png';
+import * as d3 from "d3";
 import './index.css';
 
 const url = "http://localhost:5001"
@@ -40,7 +41,11 @@ class Root extends React.Component {
         visiblePage = <LoadingPage />;
         break;
       case 'Analysis':
-        visiblePage = <AnalysisPage data={this.state.data}/>;
+        console.log(this.state.data)
+        visiblePage = <AnalysisPage data={this.state.data}
+                        errored={this.state.error}
+                        changePage={this.changePage}
+                        updateData={this.updateData}/>;
         break;
       default:
         visiblePage = null;
@@ -66,12 +71,7 @@ class Header extends React.Component {
 }
 
 class LandingPage extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
-    console.log(this.props)
     return (
       <div className='pageContent'>
         {this.props.errored ? <div className="alert alert-danger">There was an error in processing the article.</div> : null}
@@ -86,7 +86,7 @@ class LandingPage extends React.Component {
 }
 
 const LoadingPage = () => (
-      <div className='analysisContent'>
+      <div className='pageContent'>
         <p>
           Analyzing...
         </p>
@@ -95,19 +95,35 @@ const LoadingPage = () => (
 );
 
 class AnalysisPage extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
+    let data = this.props.data.dictionary
+    let keys = Object.keys(data);
+    console.log(this.props.data.total_bias)
+    let bias = this.props.data.total_bias[0] + this.props.data.total_bias[1]
+    let values = keys.map(key => data[key])
+    let extent = d3.extent(values, d=>d)
+    let scale = d3.scaleLinear().domain([extent[0], 0, extent[1]]).range(["#e74c3c", "#fff", "#3498db"])
+    let sentScaleColor = d3.scaleLinear().domain([-3, 0, 3]).range(["#e74c3c", "#ddd", "#3498db"])
+    let sentScale = d3.scaleQuantile()
+      .domain([-3, -1, 0, 1, 3])
+      .range(["Strongly Conservative", "Conservative", "Neutral", "Liberal", "Strong Liberal"])
     return (
-      <div className='pageContent'>
-        <h2 className='title'>Analyze a URL</h2>
-        <UrlInput changePage={this.props.changePage}/>
-        <p>
-          modemo can analyze the political bias of any news article for you.
-          Just input the article url of your choice and let Modemo show you the results.
-        </p>
+      <div className='content'>
+        <div className='pageContent'>
+          <h2 className='title'>Analyze a URL</h2>
+          <UrlInput changePage={this.props.changePage} updateData={this.props.updateData}/>
+        </div>
+        <div className='analysisContent'>
+        <div className='analysisHeader'>
+          <h2 className='text-stroke' style={{color: sentScaleColor(bias)}}>{sentScale(bias)}</h2>
+          <p> Blue sentences indicate more liberal while red sentences are more conservative. Regular sentences are neutral. </p>
+        </div>
+        {
+          keys.map((key, i) => {
+            return <span key={i} style={{backgroundColor: scale(data[key])}}>{key}</span>
+          })
+        }
+        </div>
       </div>);
   }
 }
@@ -127,14 +143,18 @@ class UrlInput extends React.Component {
 
   handleSubmit() {
     this.props.changePage("Loading")
-    // axios.post(url + "/analyze", {url: this.state.url})
-    // .then(response => {
-    //   this.props.changePage("Analysis")
-    //   this.props.updateData(response.data)
-    // })
-    // .catch(error => {
-    //   this.props.changePage("Home", true)
-    // })
+    axios.get(url + "/get_dict", {
+        params: { url: this.state.url },
+        timeout: Number.POSITIVE_INFINITY
+    })
+    .then(response => {
+      this.props.updateData(response.data)
+      this.props.changePage("Analysis")
+    })
+    .catch(error => {
+      console.log(error)
+      this.props.changePage("Home", true)
+    })
   }
 
   render() {
