@@ -22,7 +22,7 @@ import sarcasm_detection.sarcasm as sarcasm_analyzer
 dir_path = os.path.dirname(os.path.realpath(__file__))
 class BiasAnalyzer(object):
     def __init__(self, withSVM=False):
-        [lib, con, neu] = cPickle.load(open(os.getcwd() + '/modules/sampleData.pkl', 'rb'))
+        [lib, con, neu] = cPickle.load(open(os.getcwd() + '/sampleData.pkl', 'rb'))
 
         self.bias_dict = {}
 
@@ -161,7 +161,7 @@ class BiasAnalyzer(object):
 
         self.blacklist = list(sentences)
         bound = len(self.blacklist)+2
-        print('bound ' + str(bound))
+        # print('bound ' + str(bound))
         self.data.extend(temp)
 
         self.data_encodings = self.encoder.encode(self.data)
@@ -251,6 +251,7 @@ class BiasAnalyzer(object):
             bias_intensity *= weight
 
             print('BIAS INTENSITY: ', bias_intensity)
+            print('------------------------------------------------')
 
             # rationale: we dont want a sentence's bias index to be drastically reduced just because
             # there isnt much sentiment detected. likewise, we dont want its bias sign flipped just
