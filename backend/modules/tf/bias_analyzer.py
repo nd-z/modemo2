@@ -142,7 +142,14 @@ class BiasAnalyzer(object):
 
         print('PREDICTED BIAS DIRECTION: ', bias_direction)
 
-        bias_intensity *= bias_direction
+        if (bias_direction > 0):
+            bias_intensity = abs(bias_intensity)
+        elif (bias_direction < 0):
+            bias_intensity = -1*abs(bias_intensity)
+        else:
+            bias_intensity = 0
+
+        # bias_intensity *= bias_direction
 
         if abs(bias_vec[0]) > magnitude_cap:
             bias_intensity *= abs(bias_vec[0])
@@ -231,7 +238,7 @@ class BiasAnalyzer(object):
             bias_intensity = bias_vec[2]*bias_vec[3]
             print('sarcasm score: ')
             print(sarcasm_score)
-            if(sarcasm_score > 0.5):
+            if(sarcasm_score > 0.75):
                 print('super sarcastic yo')
                 bias_intensity *= -1 * sarcasm_score
 
