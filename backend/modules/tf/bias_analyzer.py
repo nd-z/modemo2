@@ -137,10 +137,12 @@ class BiasAnalyzer(object):
 
         if bias_direction == 2:
             bias_direction = -1
+        else:
+            bias_direction = bias_direction[0]
 
         print('PREDICTED BIAS DIRECTION: ', bias_direction)
 
-        bias_intensity *= bias_direction[0]
+        bias_intensity *= bias_direction
 
         if abs(bias_vec[0]) > magnitude_cap:
             bias_intensity *= abs(bias_vec[0])
