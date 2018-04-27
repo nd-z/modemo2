@@ -19,7 +19,7 @@ import sarcasm_detection.sarcasm as sarcasm_analyzer
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-class BiasAnalyzer(object):
+class BiasAnalyzerOld(object):
     def __init__(self):
         [lib, con, neu] = cPickle.load(open(os.getcwd() + '/sampleData.pkl', 'rb'))
 
@@ -186,7 +186,7 @@ class BiasAnalyzer(object):
             # one of our biased sentences, the less we want it to weigh in
             # the aggregate score
 
-            bias_intensity = bias_vec[2]*bias_vec[3]
+            bias_intensity = bias_vec[1]*bias_vec[2]
 
             # we may want to threshold the sentiment score
             # because if it's only slightly negative, it might just be
