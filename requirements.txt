@@ -17,7 +17,7 @@ funcsigs==1.0.2
 futures==3.2.0
 gensim==3.4.0
 goose-extractor==1.0.25
-html5lib==0.9999999
+html5lib==0.99999999
 idna==2.6
 jmespath==0.9.3
 Keras==2.1.4
